@@ -9,6 +9,7 @@ class AlarmSettings {
   /// Constructs an instance of `AlarmSettings`.
   const AlarmSettings({
     required this.id,
+    required this.scheduleId,
     required this.dateTime,
     required this.assetAudioPath,
     required this.notificationSettings,
@@ -47,6 +48,7 @@ class AlarmSettings {
 
     return AlarmSettings(
       id: json['id'] as int,
+      scheduleId: json['scheduleId'] as int,
       dateTime: DateTime.fromMicrosecondsSinceEpoch(json['dateTime'] as int),
       assetAudioPath: json['assetAudioPath'] as String,
       notificationSettings: notificationSettings,
@@ -61,6 +63,9 @@ class AlarmSettings {
 
   /// Unique identifier assiocated with the alarm. Cannot be 0 or -1;
   final int id;
+
+
+  final int scheduleId;
 
   /// Date and time when the alarm will be triggered.
   final DateTime dateTime;
@@ -142,6 +147,7 @@ class AlarmSettings {
     var hash = 0;
 
     hash = hash ^ id.hashCode;
+    hash = hash ^ scheduleId.hashCode;
     hash = hash ^ dateTime.hashCode;
     hash = hash ^ assetAudioPath.hashCode;
     hash = hash ^ notificationSettings.hashCode;
@@ -160,6 +166,7 @@ class AlarmSettings {
   /// the new values.
   AlarmSettings copyWith({
     int? id,
+    int? scheduleId,
     DateTime? dateTime,
     String? assetAudioPath,
     NotificationSettings? notificationSettings,
@@ -174,6 +181,7 @@ class AlarmSettings {
   }) {
     return AlarmSettings(
       id: id ?? this.id,
+      scheduleId: scheduleId ?? this.scheduleId,
       dateTime: dateTime ?? this.dateTime,
       assetAudioPath: assetAudioPath ?? this.assetAudioPath,
       notificationSettings: notificationSettings ?? this.notificationSettings,
@@ -191,6 +199,7 @@ class AlarmSettings {
   /// Converts this `AlarmSettings` instance to JSON data.
   Map<String, dynamic> toJson() => {
         'id': id,
+        'scheduleId': scheduleId,
         'dateTime': dateTime.microsecondsSinceEpoch,
         'assetAudioPath': assetAudioPath,
         'notificationSettings': notificationSettings.toJson(),
@@ -219,6 +228,7 @@ class AlarmSettings {
       other is AlarmSettings &&
           runtimeType == other.runtimeType &&
           id == other.id &&
+          scheduleId == other.scheduleId &&
           dateTime == other.dateTime &&
           assetAudioPath == other.assetAudioPath &&
           notificationSettings == other.notificationSettings &&

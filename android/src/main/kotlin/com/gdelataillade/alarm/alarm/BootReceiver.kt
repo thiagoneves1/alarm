@@ -45,6 +45,8 @@ class BootReceiver : BroadcastReceiver() {
                     "title" to alarm.notificationSettings.title,
                     "body" to alarm.notificationSettings.body,
                     "stopButton" to alarm.notificationSettings.stopButton,
+                    "confirmButton" to alarm.notificationSettings.confirmButton,
+                    "snoozeButton" to alarm.notificationSettings.snoozeButton,
                     "icon" to alarm.notificationSettings.icon
                 )
             )

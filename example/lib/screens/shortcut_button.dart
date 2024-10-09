@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ class _ExampleAlarmHomeShortcutButtonState
 
     final alarmSettings = AlarmSettings(
       id: DateTime.now().millisecondsSinceEpoch % 10000,
+      scheduleId : Random().nextInt(10000),
       dateTime: dateTime,
       assetAudioPath: 'assets/marimba.mp3',
       volume: volume,
@@ -40,6 +42,9 @@ class _ExampleAlarmHomeShortcutButtonState
         title: 'Alarm example',
         body: 'Shortcut button alarm with delay of $delayInHours hours',
         icon: 'notification_icon',
+        snoozeButton: "snooze",
+        stopButton: "stop",
+        confirmButton: "confirm",
       ),
       warningNotificationOnKill: Platform.isIOS,
     );

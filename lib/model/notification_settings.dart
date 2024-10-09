@@ -11,6 +11,8 @@ class NotificationSettings {
     required this.title,
     required this.body,
     this.stopButton,
+    this.snoozeButton,
+    this.confirmButton,
     this.icon,
   });
 
@@ -20,6 +22,8 @@ class NotificationSettings {
         title: json['title'] as String,
         body: json['body'] as String,
         stopButton: json['stopButton'] as String?,
+        snoozeButton: json['snoozeButton'] as String?,
+        confirmButton: json['confirmButton'] as String?,
         icon: json['icon'] as String?,
       );
 
@@ -34,6 +38,10 @@ class NotificationSettings {
   /// Won't work on iOS if app was killed.
   /// If null, button will not be shown. Null by default.
   final String? stopButton;
+
+  final String? snoozeButton;
+
+  final String? confirmButton;
 
   /// The icon to display on the notification.
   ///
@@ -63,6 +71,8 @@ class NotificationSettings {
         'title': title,
         'body': body,
         'stopButton': stopButton,
+        'snoozeButton': snoozeButton,
+        'confirmButton': confirmButton,
         'icon': icon,
       };
 
@@ -93,6 +103,8 @@ class NotificationSettings {
     String? title,
     String? body,
     String? stopButton,
+    String? snoozeButton,
+    String? confirmButton,
     String? icon,
   }) {
     assert(title != null, 'NotificationSettings.title cannot be null');
@@ -102,6 +114,8 @@ class NotificationSettings {
       title: title ?? this.title,
       body: body ?? this.body,
       stopButton: stopButton ?? this.stopButton,
+      snoozeButton: snoozeButton ?? this.snoozeButton,
+      confirmButton: confirmButton ?? this.confirmButton,
       icon: icon ?? this.icon,
     );
   }

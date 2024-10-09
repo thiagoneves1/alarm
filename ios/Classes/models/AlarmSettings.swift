@@ -2,6 +2,7 @@ import Foundation
 
 struct AlarmSettings: Codable {
     let id: Int
+    let scheduleId: Int
     let dateTime: Date
     let assetAudioPath: String
     let loopAudio: Bool
@@ -14,6 +15,7 @@ struct AlarmSettings: Codable {
 
     static func fromJson(json: [String: Any]) -> AlarmSettings? {
         guard let id = json["id"] as? Int,
+              led scheduleId = json["scheduleId"] as? Int,
               let dateTimeMicros = json["dateTime"] as? Int64,
               let assetAudioPath = json["assetAudioPath"] as? String,
               let loopAudio = json["loopAudio"] as? Bool,
@@ -35,6 +37,7 @@ struct AlarmSettings: Codable {
         
         return AlarmSettings(
             id: id,
+            scheduleId: scheduleId,
             dateTime: dateTime,
             assetAudioPath: assetAudioPath,
             loopAudio: loopAudio,
@@ -58,6 +61,7 @@ struct AlarmSettings: Codable {
 
         return [
             "id": alarmSettings.id,
+            "scheduleId": alarmSettings.scheduleId,
             "dateTime": safeDateTimeMicros,
             "assetAudioPath": alarmSettings.assetAudioPath,
             "loopAudio": alarmSettings.loopAudio,

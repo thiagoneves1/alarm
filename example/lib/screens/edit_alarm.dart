@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'dart:math';
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 
@@ -83,13 +83,14 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
     }
   }
 
-  AlarmSettings buildAlarmSettings() {
+  AlarmSettings buildAlarmSettings(int scheduleId) {
     final id = creating
         ? DateTime.now().millisecondsSinceEpoch % 10000 + 1
         : widget.alarmSettings!.id;
 
     final alarmSettings = AlarmSettings(
       id: id,
+      scheduleId: scheduleId,
       dateTime: selectedDateTime,
       loopAudio: loopAudio,
       vibrate: vibrate,
@@ -99,7 +100,9 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
       notificationSettings: NotificationSettings(
         title: 'Alarm example',
         body: 'Your alarm ($id) is ringing',
-        stopButton: 'Stop the alarm',
+        stopButton: 'Stop',
+        snoozeButton: 'Snooze',
+        confirmButton: 'Confirm',
         icon: 'notification_icon',
       ),
     );
@@ -107,9 +110,13 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
   }
 
   void saveAlarm() {
+    var scheduleId = Random().nextInt(10000);
+
+    print('scheduleId: $scheduleId');
+
     if (loading) return;
     setState(() => loading = true);
-    Alarm.set(alarmSettings: buildAlarmSettings()).then((res) {
+    Alarm.set(alarmSettings: buildAlarmSettings(scheduleId)).then((res) {
       if (res && mounted) Navigator.pop(context, true);
       setState(() => loading = false);
     });

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 
@@ -5,6 +7,11 @@ class ExampleAlarmRingScreen extends StatelessWidget {
   const ExampleAlarmRingScreen({required this.alarmSettings, super.key});
 
   final AlarmSettings alarmSettings;
+
+
+  static StreamSubscription<int>? updateSubscription = Alarm.updateStream.stream.listen((_) {
+    print('Update stream received id $_');
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +21,7 @@ class ExampleAlarmRingScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Text(
-              'You alarm (${alarmSettings.id}) is ringing...',
+              'You alarm (${alarmSettings.id}) is ringing... scheduleId ${alarmSettings.scheduleId}',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const Text('🔔', style: TextStyle(fontSize: 50)),

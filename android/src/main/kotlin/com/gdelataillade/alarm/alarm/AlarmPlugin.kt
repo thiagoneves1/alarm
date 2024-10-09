@@ -1,20 +1,17 @@
 package com.gdelataillade.alarm.alarm
 
 import com.gdelataillade.alarm.services.NotificationOnKillService
-import com.gdelataillade.alarm.services.AlarmStorage
 import com.gdelataillade.alarm.models.AlarmSettings
+import android.content.SharedPreferences
 
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.app.AlarmManager
 import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import androidx.annotation.NonNull
-import java.util.Date
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -40,11 +37,14 @@ class AlarmPlugin: FlutterPlugin, MethodCallHandler {
     }
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        Log.d("AlarmPlugin", "Attached to engine")
         context = flutterPluginBinding.applicationContext
 
+        // Receive method calls from Flutter
         methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "com.gdelataillade.alarm/alarm")
         methodChannel.setMethodCallHandler(this)
 
+        // Receive events from AlarmService and send them to Flutter
         eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "com.gdelataillade.alarm/events")
         eventChannel.setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink) {
@@ -57,10 +57,18 @@ class AlarmPlugin: FlutterPlugin, MethodCallHandler {
         })
     }
 
+
+
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
+        Log.d("AlarmPlugin", "Method call: ${call.method}")
+
         when (call.method) {
             "setAlarm" -> {
                 setAlarm(call, result)
+            }
+            "getHistoryIntents" -> {
+                getHistoryIntents()
+                result.success(true)
             }
             "stopAlarm" -> {
                 val id = call.argument<Int>("id")
@@ -95,6 +103,7 @@ class AlarmPlugin: FlutterPlugin, MethodCallHandler {
     }
 
     fun setAlarm(call: MethodCall, result: Result, customContext: Context? = null) {
+        Log.d("AlarmPlugin", "Setting alarm")
         val alarmJsonMap = call.arguments as? Map<String, Any>
         val contextToUse = customContext ?: context
 
@@ -119,7 +128,33 @@ class AlarmPlugin: FlutterPlugin, MethodCallHandler {
         }
     }
 
+    fun getHistoryIntents() {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("AlarmActions", Context.MODE_PRIVATE)
+        val allEntries = sharedPreferences.all
+
+        val editor = sharedPreferences.edit()
+        for ((key, value) in allEntries) {
+            Log.d("AlarmPlugin", "Key: $key, Value: $value")
+            if (key.startsWith("action_")) {
+                val id = key.removePrefix("action_").toInt()
+                val action = value as String
+                var map = mapOf("id" to id, "action" to action)
+
+
+                //send to flutter
+                eventSink?.success(map)
+                //remove from shared preferences
+                editor.remove(key)
+                editor.apply()
+
+            }
+        }
+
+
+    }
+
     fun stopAlarm(id: Int, result: Result? = null) {
+        Log.d("AlarmPlugin", "Stopping alarm with ID: $id")
         if (AlarmService.ringingAlarmIds.contains(id)) {
             val stopIntent = Intent(context, AlarmService::class.java)
             stopIntent.action = "STOP_ALARM"
@@ -151,6 +186,7 @@ class AlarmPlugin: FlutterPlugin, MethodCallHandler {
     }
 
     fun createAlarmIntent(context: Context, call: MethodCall, id: Int?): Intent {
+        Log.d("AlarmPlugin", "Creating alarm intent with ID: $id")
         val alarmIntent = Intent(context, AlarmReceiver::class.java)
         setIntentExtras(alarmIntent, call, id)
         return alarmIntent

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:alarm/alarm.dart';
+import 'package:alarm_example/alarm_event_receiver/alarm_event_receiver.dart';
 import 'package:alarm_example/screens/edit_alarm.dart';
 import 'package:alarm_example/screens/ring.dart';
 import 'package:alarm_example/screens/shortcut_button.dart';
@@ -20,9 +21,9 @@ class ExampleAlarmHomeScreen extends StatefulWidget {
 
 class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
   late List<AlarmSettings> alarms;
-
   static StreamSubscription<AlarmSettings>? ringSubscription;
   static StreamSubscription<int>? updateSubscription;
+  final AlarmEventReceiver _alarmEventReceiver = AlarmEventReceiver();
 
   @override
   void initState() {
@@ -34,8 +35,11 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
     loadAlarms();
     ringSubscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
     updateSubscription ??= Alarm.updateStream.stream.listen((_) {
+      print('Update stream received id $_');
       loadAlarms();
     });
+    _alarmEventReceiver..startListening()
+    ..recoveryIntents(context);
   }
 
   void loadAlarms() {

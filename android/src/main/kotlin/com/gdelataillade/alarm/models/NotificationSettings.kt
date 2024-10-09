@@ -6,6 +6,8 @@ data class NotificationSettings(
     val title: String,
     val body: String,
     val stopButton: String? = null,
+    val confirmButton: String? = null,
+    val snoozeButton: String? = null,
     val icon: String? = null
 ) {
     companion object {

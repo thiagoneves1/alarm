@@ -7,6 +7,7 @@ import io.flutter.Log
 
 data class AlarmSettings(
     val id: Int,
+    val scheduleId: Int,
     val dateTime: Date,
     val assetAudioPath: String,
     val notificationSettings: NotificationSettings,
