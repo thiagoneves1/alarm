@@ -15,7 +15,7 @@ struct AlarmSettings: Codable {
 
     static func fromJson(json: [String: Any]) -> AlarmSettings? {
         guard let id = json["id"] as? Int,
-              led scheduleId = json["scheduleId"] as? Int,
+              let scheduleId = json["scheduleId"] as? Int,
               let dateTimeMicros = json["dateTime"] as? Int64,
               let assetAudioPath = json["assetAudioPath"] as? String,
               let loopAudio = json["loopAudio"] as? Bool,

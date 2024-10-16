@@ -13,6 +13,12 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         
         let stopAction = UNNotificationAction(identifier: "STOP_ACTION", title: stopButton, options: [.destructive])
         actions.append(stopAction)
+
+        let snoozeAction = UNNotificationAction(identifier: "SNOOZE_ACTION", title: "Snooze", options:[.destructive])
+        actions.append(snoozeAction)
+
+        let confirmAction = UNNotificationAction(identifier: "CONFIRM_ACTION", title: "Confirm", options: [.destructive])
+        actions.append(confirmAction)
         
         let category = UNNotificationCategory(identifier: "ALARM_CATEGORY", actions: actions, intentIdentifiers: [], options: [])
         
@@ -55,10 +61,19 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         guard let identifier = identifier else { return }
         guard let id = notification.request.content.userInfo["id"] as? Int else { return }
 
+        NSLog("[NotificationManager] Handling action: \(identifier) for notification: \(notification.request.identifier)")
         switch identifier {
         case "STOP_ACTION":
-            NSLog("[NotificationManager] Stop action triggered for notification: \(notification.request.identifier)")
-            SwiftAlarmPlugin.shared.unsaveAlarm(id: id)
+            NSLog("#FLOW [NotificationManager] Stop action triggered for notification: \(notification.request.identifier)")
+            SwiftAlarmPlugin.shared.unsaveAlarm(id: id) //SwiftAlarmPlugin.shared.unsaveAlarm(id: id, action: "STOP_ACTION")
+
+         case "SNOOZE_ACTION":
+            NSLog("#FLOW [NotificationManager] Snooze action triggered for notification: \(notification.request.identifier)")
+            //SwiftAlarmPlugin.shared.unsaveAlarm(id: id, action: "SNOOZE_ACTION") //TODO to implement
+
+        case "CONFIRM_ACTION":
+            NSLog("#FLOW [NotificationManager] Confirm action triggered for notification: \(notification.request.identifier)")
+            //SwiftAlarmPlugin.shared.confirmAlarm(id: id) //TODO to implement
         default:
             break
         }

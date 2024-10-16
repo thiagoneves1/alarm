@@ -7,6 +7,7 @@ import com.gdelataillade.alarm.services.VolumeService
 import com.gdelataillade.alarm.models.NotificationSettings
 
 import android.app.Service
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Intent
@@ -61,6 +62,8 @@ class AlarmService : Service() {
             return START_NOT_STICKY
         }
 
+        //TODO implement snooze here on Android side and keep the same alarm id, and we can recovery that in flutter side
+        //TODO we can call the alarmPlugin method to snooze the alarm?, otherwise, we need create the alarm like alarmPlugin does
         if (action == "SNOOZE_ALARM" && id != 0) {
             unsaveAlarm(this, id, "snooze")
             return START_NOT_STICKY
@@ -141,7 +144,6 @@ class AlarmService : Service() {
 
         return START_STICKY
     }
-
 
     fun unsaveAlarm(context: Context, id: Int, method: String) {
         Log.d("AlarmService", "Un-saving alarm with id: $id and method: $method")
