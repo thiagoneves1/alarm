@@ -101,7 +101,7 @@ class _ExampleAlarmEditScreenState extends State<ExampleAlarmEditScreen> {
         title: 'Alarm example',
         body: 'Your alarm ($id) is ringing',
         stopButton: 'Stop',
-        snoozeButton: 'Snooze',
+        snoozeButton: 'Snooze/Skip',
         confirmButton: 'Confirm',
         icon: 'notification_icon',
       ),

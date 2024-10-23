@@ -16,14 +16,18 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
     static let shared = SwiftAlarmPlugin()
     static let backgroundTaskIdentifier: String = "com.gdelataillade.fetch"
     private var channel: FlutterMethodChannel!
+    private var eventChannel: FlutterEventChannel!
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "com.gdelataillade/alarm", binaryMessenger: registrar.messenger())
+        let eventChannel = FlutterEventChannel(name: "com.gdelataillade/events", binaryMessenger: registrar.messenger())
         let instance = SwiftAlarmPlugin.shared
 
         instance.channel = channel
+        instance.eventChannel = eventChannel
         instance.registrar = registrar
         registrar.addMethodCallDelegate(instance, channel: channel)
+        eventChannel.setStreamHandler(instance)
     }
 
     private var alarms: [Int: AlarmConfiguration] = [:]
@@ -49,6 +53,25 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
                 return
             }
             self.stopAlarm(id: id, cancelNotif: true, result: result)
+        case "snoozeAlarm" :
+            guard let args = call.arguments as? [String: Any], let id = args["id"] as? Int else {
+                  result(FlutterError(code: "NATIVE_ERR", message: "[SwiftAlarmPlugin] Error: id parameter is missing or invalid", details: nil))
+                  return
+              }
+            self.stopAlarm(id: id, cancelNotif: true, result: result)    //TODO to implement
+        case "confirmAlarm" :
+            guard let args = call.arguments as? [String: Any], let id = args["id"] as? Int else {
+                              result(FlutterError(code: "NATIVE_ERR", message: "[SwiftAlarmPlugin] Error: id parameter is missing or invalid", details: nil))
+                              return
+                          }
+                        self.stopAlarm(id: id, cancelNotif: true, result: result)    //TODO to implement
+
+        case "getHistoryIntents":
+            NSLog("[SwiftAlarmPlugin] getHistoryIntents ")
+            let actions = self.getSavedAlarmActions()
+            NSLog("[SwiftAlarmPlugin] Saved alarm actions: \(actions)")
+            result(true)
+
         case "audioCurrentTime":
             guard let args = call.arguments as? [String: Any], let id = args["id"] as? Int else {
                 result(FlutterError(code: "NATIVE_ERR", message: "[SwiftAlarmPlugin] Error: id parameter is missing or invalid for audioCurrentTime", details: nil))
@@ -71,7 +94,43 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
     func unsaveAlarm(id: Int) {
         AlarmStorage.shared.unsaveAlarm(id: id)
         self.stopAlarm(id: id, cancelNotif: true, result: { _ in })
+        NSLog("[SwiftAlarmPlugin] Alarm with id \(id) unsaved")
         channel.invokeMethod("alarmStoppedFromNotification", arguments: ["id": id])
+    }
+
+    func snoozeAlarm(id: Int) {
+        //TODO to implement the snooze function
+        channel.invokeMethod("alarmSnoozedFromNotification", arguments: ["id": id])
+    }
+
+    func confirmAlarm(id: Int) {
+
+        self.stopAlarm(id: id, cancelNotif: true, result: { _ in })
+        channel.invokeMethod("alarmConfirmedFromNotification", arguments: ["id": id])
+    }
+
+    func saveAlarmAction(id: Int, action: String) {
+
+        let actionDetails: [String: Any] = ["id": id, "action": action, "timestamp": Date().timeIntervalSince1970]
+
+        var savedActions = UserDefaults.standard.array(forKey: "savedAlarmActions") as? [[String: Any]] ?? []
+
+        NSLog("#FLOW [SwiftAlarmPlugin] Saved alarm actions before: \(savedActions)")
+
+        savedActions.append(actionDetails)
+        NSLog("#FLOW [SwiftAlarmPlugin] Saved alarm actions after: \(savedActions)")
+
+
+        UserDefaults.standard.set(savedActions, forKey: "savedAlarmActions")
+    }
+
+    private func getSavedAlarmActions() -> [[String: Any]] {
+        let savedActions = UserDefaults.standard.array(forKey: "savedAlarmActions") as? [[String: Any]] ?? []
+        NSLog("#FLOW [SwiftAlarmPlugin] Saved alarm actions: \(savedActions)")
+
+        let streamHandler = SwiftAlarmStreamHandler(savedActions: savedActions)
+        self.eventChannel.setStreamHandler(streamHandler)
+        return savedActions
     }
 
     private func setAlarm(call: FlutterMethodCall, result: FlutterResult) {
@@ -455,5 +514,44 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
         } else {
             NSLog("[SwiftAlarmPlugin] BGTaskScheduler not available for your version of iOS lower than 13.0")
         }
+    }
+}
+
+
+extension SwiftAlarmPlugin: FlutterStreamHandler {
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        NSLog("[SwiftAlarmPlugin] onListen \(arguments) events \(events)")
+        return nil
+    }
+
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        // Handle the cancellation of the event stream
+        NSLog("[SwiftAlarmPlugin] onCancel \(arguments)")
+        return nil
+    }
+}
+
+
+class SwiftAlarmStreamHandler: NSObject, FlutterStreamHandler {
+    private var eventSink: FlutterEventSink?
+    var savedActions: [[String: Any]]
+
+
+    init(savedActions: [[String: Any]]) {
+        self.savedActions = savedActions
+        super.init()
+    }
+
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        self.eventSink = events
+        if !savedActions.isEmpty {
+            events(savedActions)
+        }
+        return nil
+    }
+
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        eventSink = nil
+        return nil
     }
 }

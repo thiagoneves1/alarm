@@ -59,6 +59,7 @@ class AlarmPlugin: FlutterPlugin, MethodCallHandler {
 
 
 
+    //TODO implement snooze and confirm methods
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         Log.d("AlarmPlugin", "Method call: ${call.method}")
 
@@ -79,6 +80,7 @@ class AlarmPlugin: FlutterPlugin, MethodCallHandler {
 
                 stopAlarm(id, result)
             }
+
             "isRinging" -> {
                 val id = call.argument<Int>("id")
                 val ringingAlarmIds = AlarmService.ringingAlarmIds

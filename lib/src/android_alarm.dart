@@ -77,6 +77,30 @@ class AndroidAlarm {
     }
   }
 
+  static Future<bool> snooze(int id) async {
+    try {
+      final res =
+          await methodChannel.invokeMethod('snoozeAlarm', {'id': id}) as bool;
+      if (res) alarmPrint('Alarm with id $id snoozed');
+      return res;
+    } catch (e) {
+      alarmPrint('Failed to snooze alarm: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> confirm(int id) async {
+    try {
+      final res =
+          await methodChannel.invokeMethod('confirmAlarm', {'id': id}) as bool;
+      if (res) alarmPrint('Alarm with id $id confirmed');
+      return res;
+    } catch (e) {
+      alarmPrint('Failed to confirm alarm: $e');
+      return false;
+    }
+  }
+
   /// Checks if the alarm with given [id] is ringing.
   static Future<bool> isRinging(int id) async {
     try {

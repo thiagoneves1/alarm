@@ -10,6 +10,8 @@ class IOSAlarm {
   /// Method channel for the alarm.
   static const methodChannel = MethodChannel('com.gdelataillade/alarm');
 
+  static const eventChannel = EventChannel("com.gdelataillade/events");
+
   /// Map of alarm timers.
   static Map<int, Timer?> timers = {};
 
@@ -24,6 +26,7 @@ class IOSAlarm {
     final arguments = call.arguments as Map<String, dynamic>;
     final id = arguments['id'] as int?;
     if (id != null) await Alarm.reload(id);
+
   }
 
   /// Calls the native function `setAlarm` and listens to alarm ring state.
@@ -85,7 +88,7 @@ class IOSAlarm {
   /// and calls the native `stopAlarm` function.
   static Future<bool> stopAlarm(int id) async {
     disposeAlarm(id);
-
+    print('Stopping alarm with id $id');
     final res = await methodChannel.invokeMethod<bool?>(
           'stopAlarm',
           {'id': id},
