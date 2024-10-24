@@ -115,10 +115,10 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
 
         var savedActions = UserDefaults.standard.array(forKey: "savedAlarmActions") as? [[String: Any]] ?? []
 
-        NSLog("#FLOW [SwiftAlarmPlugin] Saved alarm actions before: \(savedActions)")
+        NSLog("[SwiftAlarmPlugin] Saved alarm actions before: \(savedActions)")
 
         savedActions.append(actionDetails)
-        NSLog("#FLOW [SwiftAlarmPlugin] Saved alarm actions after: \(savedActions)")
+        NSLog("[SwiftAlarmPlugin] Saved alarm actions after: \(savedActions)")
 
 
         UserDefaults.standard.set(savedActions, forKey: "savedAlarmActions")
@@ -126,7 +126,7 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
 
     private func getSavedAlarmActions() -> [[String: Any]] {
         let savedActions = UserDefaults.standard.array(forKey: "savedAlarmActions") as? [[String: Any]] ?? []
-        NSLog("#FLOW [SwiftAlarmPlugin] Saved alarm actions: \(savedActions)")
+        NSLog("[SwiftAlarmPlugin] Saved alarm actions: \(savedActions)")
 
         let streamHandler = SwiftAlarmStreamHandler(savedActions: savedActions)
         self.eventChannel.setStreamHandler(streamHandler)
@@ -217,27 +217,28 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
         }
     }
 
-    private func loadAudioPlayer(withAsset assetAudio: String, forId id: Int) -> AVAudioPlayer? {
-        let audioURL: URL
-        if assetAudio.hasPrefix("assets/") || assetAudio.hasPrefix("asset/") {
-            let filename = registrar.lookupKey(forAsset: assetAudio)
-            guard let audioPath = Bundle.main.path(forResource: filename, ofType: nil) else {
-                NSLog("[SwiftAlarmPlugin] Audio file not found: \(assetAudio)")
-                return nil
-            }
-            audioURL = URL(fileURLWithPath: audioPath)
+private func loadAudioPlayer(withAsset assetAudio: String, forId id: Int) -> AVAudioPlayer? {
+    let audioURL: URL
+    if assetAudio.hasPrefix("assets/") || assetAudio.hasPrefix("asset/") {
+        // Resolve the path for assets
+        if let assetPath = Bundle.main.path(forResource: registrar.lookupKey(forAsset: assetAudio), ofType: nil) {
+            audioURL = URL(fileURLWithPath: assetPath)
         } else {
-            let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            audioURL = documentsDirectory.appendingPathComponent(assetAudio)
-        }
-
-        do {
-            return try AVAudioPlayer(contentsOf: audioURL)
-        } catch {
-            NSLog("[SwiftAlarmPlugin] Error loading audio player: \(error.localizedDescription)")
+            NSLog("[SwiftAlarmPlugin] Error: Asset path not found for \(assetAudio)")
             return nil
         }
+    } else {
+        // Handle other paths
+        audioURL = URL(fileURLWithPath: assetAudio)
     }
+
+    do {
+        return try AVAudioPlayer(contentsOf: audioURL)
+    } catch {
+        NSLog("[SwiftAlarmPlugin] Error loading audio player: \(error.localizedDescription)")
+        return nil
+    }
+}
 
     @objc func executeTask(_ timer: Timer) {
         if let id = timer.userInfo as? Int, let task = alarms[id]?.task {

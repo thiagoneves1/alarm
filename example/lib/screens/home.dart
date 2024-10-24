@@ -23,28 +23,28 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
   late List<AlarmSettings> alarms;
   static StreamSubscription<AlarmSettings>? ringSubscription;
   static StreamSubscription<int>? updateSubscription;
-  final AlarmEventReceiver _alarmEventReceiver = AlarmEventReceiver();
+  //final AlarmEventReceiver _alarmEventReceiver = AlarmEventReceiver();
 
   @override
   void initState() {
     super.initState();
     AlarmPermissions.checkNotificationPermission();
-    if (Alarm.android) {
+    if (Alarm().android) {
       AlarmPermissions.checkAndroidScheduleExactAlarmPermission();
     }
     loadAlarms();
-    ringSubscription ??= Alarm.ringStream.stream.listen(navigateToRingScreen);
-    updateSubscription ??= Alarm.updateStream.stream.listen((_) {
+    ringSubscription ??= Alarm().ringStream.stream.listen(navigateToRingScreen);
+    updateSubscription ??= Alarm().updateStream.stream.listen((_) {
       print('Update stream received id $_');
       loadAlarms();
     });
-    _alarmEventReceiver..startListening()
-    ..recoveryIntents(context);
+    // _alarmEventReceiver..startListening()
+    // ..recoveryIntents(context);
   }
 
   void loadAlarms() {
     setState(() {
-      alarms = Alarm.getAlarms();
+      alarms = Alarm().getAlarms();
       alarms.sort((a, b) => a.dateTime.isBefore(b.dateTime) ? 0 : 1);
     });
   }
@@ -116,7 +116,7 @@ class _ExampleAlarmHomeScreenState extends State<ExampleAlarmHomeScreen> {
                     ).format(context),
                     onPressed: () => navigateToAlarmScreen(alarms[index]),
                     onDismissed: () {
-                      Alarm.stop(alarms[index].id).then((_) => loadAlarms());
+                      Alarm().stop(alarms[index].id).then((_) => loadAlarms());
                     },
                   );
                 },

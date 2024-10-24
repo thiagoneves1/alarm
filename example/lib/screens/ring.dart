@@ -9,7 +9,7 @@ class ExampleAlarmRingScreen extends StatelessWidget {
   final AlarmSettings alarmSettings;
 
 
-  static StreamSubscription<int>? updateSubscription = Alarm.updateStream.stream.listen((_) {
+  static StreamSubscription<int>? updateSubscription = Alarm().updateStream.stream.listen((_) {
     print('Update stream received id $_');
   });
 
@@ -31,7 +31,7 @@ class ExampleAlarmRingScreen extends StatelessWidget {
                 RawMaterialButton(
                   onPressed: () {
                     final now = DateTime.now();
-                    Alarm.set(
+                    Alarm().set(
                       alarmSettings: alarmSettings.copyWith(
                         dateTime: DateTime(
                           now.year,
@@ -52,7 +52,7 @@ class ExampleAlarmRingScreen extends StatelessWidget {
                 ),
                 RawMaterialButton(
                   onPressed: () {
-                    Alarm.stop(alarmSettings.id).then((_) {
+                    Alarm().stop(alarmSettings.id).then((_) {
                       if (context.mounted) Navigator.pop(context);
                     });
                   },

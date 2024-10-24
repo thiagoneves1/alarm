@@ -12,7 +12,7 @@ class AndroidAlarm {
   static const eventChannel = EventChannel('com.gdelataillade.alarm/events');
 
   /// Whether there are other alarms set.
-  static bool get hasOtherAlarms => Alarm.getAlarms().length > 1;
+  static bool get hasOtherAlarms => Alarm().getAlarms().length > 1;
 
   /// Starts listening to the native alarm events.
   static void init() => listenToNativeEvents();
@@ -29,10 +29,10 @@ class AndroidAlarm {
 
           switch (method) {
             case 'stop':
-              await Alarm.reload(id);
+              await Alarm().reload(id);
             case 'ring':
-              final settings = Alarm.getAlarm(id);
-              if (settings != null) Alarm.ringStream.add(settings);
+              final settings = Alarm().getAlarm(id);
+              if (settings != null) Alarm().ringStream.add(settings);
           }
         } catch (e) {
           alarmPrint('Error receiving alarm events: $e');
