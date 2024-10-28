@@ -49,7 +49,7 @@ class _ExampleAlarmHomeShortcutButtonState
       warningNotificationOnKill: Platform.isIOS,
     );
 
-    await Alarm().set(alarmSettings: alarmSettings);
+    await Alarm.set(alarmSettings: alarmSettings);
 
     widget.refreshAlarms();
   }

@@ -54,11 +54,14 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
             }
             self.stopAlarm(id: id, cancelNotif: true, result: result)
         case "snoozeAlarm" :
+            NSLog("[SwiftAlarmPlugin] Snooze alarm handle")
             guard let args = call.arguments as? [String: Any], let id = args["id"] as? Int else {
-                  result(FlutterError(code: "NATIVE_ERR", message: "[SwiftAlarmPlugin] Error: id parameter is missing or invalid", details: nil))
-                  return
-              }
-            self.stopAlarm(id: id, cancelNotif: true, result: result)    //TODO to implement
+                result(FlutterError(code: "NATIVE_ERR", message: "[SwiftAlarmPlugin] Error: id parameter is missing or invalid", details: nil))
+                return
+            }
+
+            self.snoozeAlarm(id: id, result: result) //TODO to implement
+
         case "confirmAlarm" :
             guard let args = call.arguments as? [String: Any], let id = args["id"] as? Int else {
                               result(FlutterError(code: "NATIVE_ERR", message: "[SwiftAlarmPlugin] Error: id parameter is missing or invalid", details: nil))
@@ -66,11 +69,6 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
                           }
                         self.stopAlarm(id: id, cancelNotif: true, result: result)    //TODO to implement
 
-        case "getHistoryIntents":
-            NSLog("[SwiftAlarmPlugin] getHistoryIntents ")
-            let actions = self.getSavedAlarmActions()
-            NSLog("[SwiftAlarmPlugin] Saved alarm actions: \(actions)")
-            result(true)
 
         case "audioCurrentTime":
             guard let args = call.arguments as? [String: Any], let id = args["id"] as? Int else {
@@ -94,43 +92,20 @@ public class SwiftAlarmPlugin: NSObject, FlutterPlugin {
     func unsaveAlarm(id: Int) {
         AlarmStorage.shared.unsaveAlarm(id: id)
         self.stopAlarm(id: id, cancelNotif: true, result: { _ in })
-        NSLog("[SwiftAlarmPlugin] Alarm with id \(id) unsaved")
         channel.invokeMethod("alarmStoppedFromNotification", arguments: ["id": id])
     }
 
-    func snoozeAlarm(id: Int) {
-        //TODO to implement the snooze function
-        channel.invokeMethod("alarmSnoozedFromNotification", arguments: ["id": id])
+    func snoozeAlarm(id: Int, result : FlutterResult) {
+        NSLog("[SwiftAlarmPlugin] Snooze alarm with id \(id)")
+        //TODO to implement the snooze function, stop for now
+           self.stopAlarm(id: id, cancelNotif: true, result: { _ in })
+           channel.invokeMethod("alarmSnoozedFromNotification", arguments: ["id": id])
+           result(true)
     }
 
     func confirmAlarm(id: Int) {
-
         self.stopAlarm(id: id, cancelNotif: true, result: { _ in })
         channel.invokeMethod("alarmConfirmedFromNotification", arguments: ["id": id])
-    }
-
-    func saveAlarmAction(id: Int, action: String) {
-
-        let actionDetails: [String: Any] = ["id": id, "action": action, "timestamp": Date().timeIntervalSince1970]
-
-        var savedActions = UserDefaults.standard.array(forKey: "savedAlarmActions") as? [[String: Any]] ?? []
-
-        NSLog("[SwiftAlarmPlugin] Saved alarm actions before: \(savedActions)")
-
-        savedActions.append(actionDetails)
-        NSLog("[SwiftAlarmPlugin] Saved alarm actions after: \(savedActions)")
-
-
-        UserDefaults.standard.set(savedActions, forKey: "savedAlarmActions")
-    }
-
-    private func getSavedAlarmActions() -> [[String: Any]] {
-        let savedActions = UserDefaults.standard.array(forKey: "savedAlarmActions") as? [[String: Any]] ?? []
-        NSLog("[SwiftAlarmPlugin] Saved alarm actions: \(savedActions)")
-
-        let streamHandler = SwiftAlarmStreamHandler(savedActions: savedActions)
-        self.eventChannel.setStreamHandler(streamHandler)
-        return savedActions
     }
 
     private func setAlarm(call: FlutterMethodCall, result: FlutterResult) {
@@ -339,6 +314,14 @@ private func loadAudioPlayer(withAsset assetAudio: String, forId id: Int) -> AVA
         if alarm.fadeDuration > 0.0 {
             audioPlayer.setVolume(1.0, fadeDuration: alarm.fadeDuration)
         }
+    }
+
+    static public func testStopFromAppDelegate() {
+        NSLog("[SwiftAlarmPlugin] Test stop from app delegate")
+    }
+
+    static public func testSnoozeFromAppDelegate() {
+        NSLog("[SwiftAlarmPlugin] Test snooze from app delegate")
     }
 
     private func stopAlarm(id: Int, cancelNotif: Bool, result: FlutterResult) {

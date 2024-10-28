@@ -35,21 +35,25 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
                 return
             }
 
-            //TODO improve this
-            if let stopButton = notificationSettings.stopButton {
-                self.setupNotificationActions(stopButton: stopButton, snoozeButton: notificationSettings.snoozeButton ?? "", confirmButton: notificationSettings.confirmButton ?? "")
-            }
-    
+
+
+
+            self.setupNotificationActions(
+                stopButton: notificationSettings.stopButton ?? "",
+                snoozeButton: notificationSettings.snoozeButton ?? "",
+                confirmButton: notificationSettings.confirmButton ?? ""
+            )
+
             let content = UNMutableNotificationContent()
             content.title = notificationSettings.title
             content.body = notificationSettings.body
             content.sound = nil
             content.categoryIdentifier = "ALARM_CATEGORY"
             content.userInfo = ["id": id]
-    
+
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(delayInSeconds), repeats: false)
             let request = UNNotificationRequest(identifier: "alarm-\(id)", content: content, trigger: trigger)
-    
+
             UNUserNotificationCenter.current().add(request, withCompletionHandler: completion)
         }
     }
@@ -66,17 +70,14 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         NSLog("[NotificationManager] Handling action identifier: \(identifier) for notification: \(notification.request.identifier) AND ID \(id)")
         switch identifier {
         case "STOP_ACTION":
-            SwiftAlarmPlugin.shared.saveAlarmAction(id: id, action: "STOP_ACTION")
             SwiftAlarmPlugin.shared.unsaveAlarm(id: id)
             break;
 
          case "SNOOZE_ACTION":
-            SwiftAlarmPlugin.shared.saveAlarmAction(id: id, action: "SNOOZE_ACTION")
-            SwiftAlarmPlugin.shared.snoozeAlarm(id: id)
+            SwiftAlarmPlugin.shared.snoozeAlarm(id: id, result:  { _ in })
             break;
 
         case "CONFIRM_ACTION":
-            SwiftAlarmPlugin.shared.saveAlarmAction(id: id, action: "CONFIRM_ACTION")
             SwiftAlarmPlugin.shared.confirmAlarm(id: id)
             break;
 
@@ -96,4 +97,32 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         NSLog("[NotificationManager] willPresent notification: \(notification.request.identifier)")
         completionHandler([.alert, .sound])
     }
+
+//    func scheduleNotificationWithActions() {
+//        let content = UNMutableNotificationContent()
+//        content.title = "Meeting Reminder"
+//        content.body = "Your meeting starts in 10 minutes!"
+//        content.sound = UNNotificationSound.default
+//
+//        let action1 = UNNotificationAction(identifier: "snoozeAction", title: "Snooze", options: [])
+//        let action2 = UNNotificationAction(identifier: "cancelAction", title: "Cancel", options: [.destructive])
+//
+//        let category = UNNotificationCategory(identifier: "meetingCategory", actions: [action1, action2], intentIdentifiers: [], options: [])
+//
+//        UNUserNotificationCenter.current().setNotificationCategories([category])
+//
+//        content.categoryIdentifier = "meetingCategory"
+//
+//        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 30, repeats: false)
+//
+//        let request = UNNotificationRequest(identifier: "meetingNotification", content: content, trigger: trigger)
+//
+//        UNUserNotificationCenter.current().add(request) { error in
+//            if let error = error {
+//                print("Error scheduling notification: \(error.localizedDescription)")
+//            } else {
+//                print("Notification with actions scheduled successfully")
+//            }
+//        }
+//    }
 }
